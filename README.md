@@ -3,6 +3,13 @@
 [GitLab]()
 ---
 
+> Git
+> GitHub
+> GitLab
+
+- Git: Versiyon kontrol sistemi
+- GitHub: **Git** Repository
+
 ## Git Version
 ```sh
 git -v
