@@ -129,7 +129,15 @@ node_modules
 
 ## Git Stash
 ```sh
+git add .
+git stash
+git stash save "stash kendi ismi"
+git stash list
 
+git stash apply stash:{0}
+git stash drop stash:{0}
+
+git stash pop
 ```
 ---
 
