@@ -1,6 +1,0 @@
-Stash öncesinde çalışmalarım
-Html5 
-Css3
-JS
-React JS 
-Angular
