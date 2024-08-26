@@ -33,7 +33,6 @@ git config core.autocrlf true
 clear
 git status
 git log
-
 ```
 ---
 
@@ -63,8 +62,6 @@ git push
 NOT: Eğer önceden ilgili dosya "git add" ile eklenmişse
 git commit -a -m "commit adı"
 git push
-
-
 ```
 ---
 
@@ -81,7 +78,6 @@ Git Nedir ?
 - Git yazarı Linux çekirdeğini yazan Linus Torvalds 2005 yılında yazıyorlar
 - Eski kodlarımıza erişim sağlıyabiliyoruz.
 - Dosya değişliğini önceki sürümlere geçerek sağlıyabiliyoruz.
-
 ```
 ---
 
@@ -98,7 +94,6 @@ git clone https://github.com/hamitmizrak/Workshop_Git_GitHub_GitLab.git
 git log --decorate --oneline --graph --all
 git config --global alias.graph "log --decorate --oneline --graph --all"
 git graph
-
 ```
 ---
 
@@ -107,7 +102,6 @@ git graph
 ```sh
 git remote
 git remote set-url yeniRemoteAdi URLYazıyoruz
-
 ```
 ---
 
@@ -117,7 +111,6 @@ git remote set-url yeniRemoteAdi URLYazıyoruz
 git log
 git diff commitID1 commitID2
 git diff  dad5338a1bc2109e93dc89b26dbab5f75485f521 fe795f46ba672
-
 ```
 ---
 
