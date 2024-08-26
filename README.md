@@ -96,15 +96,20 @@ git graph
 ---
 
 
-## Git
+## Git Remote
 ```sh
+git remote
+git remote set-url yeniRemoteAdi URLYazıyoruz
 
 ```
 ---
 
 
-## Git
+## Git Diff
 ```sh
+git log
+git diff commitID1 commitID2
+git diff  dad5338a1bc2109e93dc89b26dbab5f75485f521 fe795f46ba672
 
 ```
 ---
