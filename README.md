@@ -115,29 +115,34 @@ git diff  dad5338a1bc2109e93dc89b26dbab5f75485f521 fe795f46ba672
 ---
 
 
-## Git
-````sh
+## .gitignore
+```sh
+# Bu dosyayı takip etme
+secret.txt
+
+# React, Angular vs
+node_modules
+
+```
+---
+
+
+## Git Stash
+```sh
 
 ```
 ---
 
 
 ## Git
-````sh
+```sh
 
 ```
 ---
 
 
 ## Git
-````sh
-
-```
----
-
-
-## Git
-````sh
+```sh
 
 ```
 ---
