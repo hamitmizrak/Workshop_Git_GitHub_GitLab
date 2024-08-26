@@ -7,6 +7,9 @@
 ```sh
 git -v
 git --version
+
+git --help
+
 git config --global user.name
 git config --global user.name "Hamit Mızrak"
 git config --global user.email
@@ -71,6 +74,9 @@ git clone https://github.com/hamitmizrak/Workshop_Git_GitHub_GitLab.git
 
 ## Git Alias
 ```sh
+git log --decorate --oneline --graph --all
+git config --global alias.graph "log --decorate --oneline --graph --all"
+git graph
 
 ```
 ---
