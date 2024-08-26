@@ -10,7 +10,7 @@
 - Git: Versiyon kontrol sistemi
 - GitHub: **Git** Repository
 
-## Git Version
+## Git Config
 ```sh
 git -v
 git --version
@@ -37,7 +37,7 @@ git log
 ---
 
 
-## Git
+## Git Remote
 ```sh
 
 git init
@@ -126,7 +126,6 @@ node_modules
 ```
 ---
 
-
 ## Git Stash
 ```sh
 git add .
@@ -142,14 +141,27 @@ git stash pop
 ---
 
 
-## Git
+## Git Tag
+```sh
+git add .
+git tag v1.0.0
+git show v1.0.0
+git checkout v1.0.0
+git checkout main
+git push origin v1.0.0
+git tag --delete v1.0.0
+```
+---
+
+
+## Git Branch
 ```sh
 
 ```
 ---
 
 
-## Git
+## Git Conflict
 ```sh
 
 ```
