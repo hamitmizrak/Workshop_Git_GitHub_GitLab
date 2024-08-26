@@ -202,17 +202,19 @@ git merge frontend
 git add .
 git commit -m "frontend main"
 git push
-
 git branch -D frontend
 
 # Senaryo (2)
 git checkout -b backend
-cat >> backend.txt
+cat >> backend1.txt
 git add .
-git commit -m "backend"
+git commit -m "backend1"
+cat >> backend2.txt
+git add .
+git commit -m "backend2"
 git push origin backend
 git switch main
-git merge backend
+git merge --no-ff backend
 
 ```
 ---
