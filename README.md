@@ -199,6 +199,10 @@ git commit -m "frontend2"
 git push origin frontend
 git switch main
 git merge frontend
+git add .
+git commit -m "frontend main"
+git push
+
 git branch -D frontend
 
 # Senaryo (2)
