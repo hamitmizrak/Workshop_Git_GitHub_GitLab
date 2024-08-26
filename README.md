@@ -179,6 +179,40 @@ git merge origin/main
 ## Git Branch
 ```sh
 
+NOT: Branch yapmadan önce add ve commit ve push yapalım.
+
+git branch -M main
+
+git branch 
+git branch --all
+git branch -a
+
+# Senaryo (1)
+git branch frontend
+git checkout frontend
+cat >> frontend.txt
+git add .
+git commit -m "frontend"
+git push origin frontend
+git switch main
+git merge frontend
+git branch -D frontend
+
+# Senaryo (2)
+git checkout -b backend
+cat >> backend.txt
+git add .
+git commit -m "backend"
+git push origin backend
+git switch main
+git merge backend
+
+```
+---
+
+## Git Merge
+```sh
+
 ```
 ---
 
