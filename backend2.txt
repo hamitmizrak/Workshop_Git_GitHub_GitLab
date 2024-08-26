@@ -1,5 +1,0 @@
-Spring MVC
-Spring DATA
-Spring Security
-Spring Cloud
-Spring REST

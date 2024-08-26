@@ -1,3 +1,0 @@
-Java SE
-Java EE
-Java ME
