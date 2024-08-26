@@ -158,6 +158,7 @@ git tag --delete v1.0.0
 ```sh
 git pull: Uzak repodaki bütün dosyaları hemen local projemize ekler
 NOT: Genelde conflict yeriz
+
 git pull 
 git pull origin main
 
@@ -165,6 +166,12 @@ git pull origin main
 git fetch: Uzak repodaki bütün dosyaları hemen local projemize eklemezzzzz.
 Biz kontrol ettikten sonra istersek local projemize ekleriz.
 NOT: conflict yememek için kullanmak gerekir.
+
+git fetch
+git branch -a
+git checkout remotes/origin/main
+git checkout main
+git merge origin/main
 ```
 ---
 
