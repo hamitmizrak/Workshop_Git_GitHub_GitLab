@@ -193,6 +193,9 @@ git checkout frontend
 cat >> frontend.txt
 git add .
 git commit -m "frontend"
+cat >> frontend2.txt
+git add .
+git commit -m "frontend2"
 git push origin frontend
 git switch main
 git merge frontend
