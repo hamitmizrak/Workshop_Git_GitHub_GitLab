@@ -3,8 +3,25 @@
 [GitLab]()
 ---
 
+## Git Version
+```sh
+git -v
+git --version
+git config --global user.name
+git config --global user.name "Hamit Mızrak"
+git config --global user.email
+git config --global user.email "hamitmizrak@gmail.com"
+git config --global core.editor "notepad++"
+git config --global -l
+git config core.autocrlf true
+
+
+```
+---
+
 ## Git
 ```sh
+
 git init
 git add .
 git add dosyaAdi1 dosyaAdi2
@@ -23,7 +40,6 @@ git push -u origin
 clear
 git status
 git log
-
 
 ```
 ---
@@ -46,14 +62,14 @@ Git Nedir ?
 ---
 
 
-## Git
+## Git Clone
 ```sh
-
+git clone https://github.com/hamitmizrak/Workshop_Git_GitHub_GitLab.git
 ```
 ---
 
 
-## Git
+## Git Alias
 ```sh
 
 ```
