@@ -81,8 +81,44 @@ cd C:\GitLab-Runner
 ---
 
 
-## GitLab Access token
+## GitLab Registration Token Aktifleştirmek (Group)
 ```sh
+Aşağıdaki linte => Runner => Allow member aktifleştir
+https://gitlab.com/groups/workshop644935/-/settings/ci_cd
+
+```
+---
+
+## GitLab Registration Token Görmek (Project)
+```sh
+Aşağıdaki linte => Runner => Registration Görmek
+https://gitlab.com/workshop644935/workshop_git_github_gitlab/-/settings/ci_cd
+```
+---
+
+
+
+## GitLab Runner Register
+```sh
+cd C:\GitLab-Runner
+./gitlab-runner.exe register
+GitLab Instance    : https://gitlab.com
+Registration Token : Project => Runner => Registration Token
+Description        : GitLab Devops Enegineering
+tags               : windows,gitlab,cicd
+Enter optional maintenance note for the runner: gitlab runner ok
+
+executor           : docker+machine
+Enter the default Docker image (for example, ruby:2.7): alpine
+
+
+
+executor           : shell
+executor           : docker
+executor           : docker-windows
+executor           : virtualbox
+executor           : ssh
+executor           : kubernates k8s
 
 ```
 ---
