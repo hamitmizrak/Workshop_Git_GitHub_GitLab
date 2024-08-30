@@ -1,0 +1,140 @@
+# Genel Değişkenler (Global Variable)
+variables:
+  GLOBAL_VAR: "Bu genel bir değişkendir"
+  AFTER_VAR: "Sonra"
+  BEFORE_VAR: "Önce"
+
+# Cache : Sık kullanılan bağımlılıkları ön belleğe alınması içindir.
+cache:
+  paths:
+    - node_modules/
+    - .npm/
+
+##################################################################
+# Her işten önce çalışacak
+before_script:
+    - echo "Bütün Scriptlerden $BEFORE_VAR Çalıştı"
+    #https://gitlab.com/devops-engineering3/offline-gitlab/-/settings/ci_cd
+    - echo "$PROJECT_VARIABLE"
+
+# Her işten sonra çalışacak
+after_script:
+    - echo "Bütün Scriptlerden $AFTER_VAR Çalıştı"
+    - echo "temizleme Genel değişkenlerden $GLOBAL_VAR okundu"
+
+    # unset: CI/CD pipelinelerda before_script_after_script veya script içinde 
+    # tanımlanan geçici değişkenleri temizlemek için kullanılır
+    # Bellek yönetiminde, büyük karmaşık pipelarda geçici değişkenlerin kullanımını bellekten temizlek için
+    # Güvenlik: Hassas bilgileri içeren kısımlarda erişilmemesi için kullanılır.
+    # unset: Bir değişkenin artık kullanılmayacağını belirtmek için kullanırız.
+    - unset GLOBAL_VAR 
+    
+##################################################################
+# Aşamalar
+stages:
+  - build
+  - test
+  - deploy
+  - pages
+
+
+# Dışarıdan YAML Dosyalarını Dahil Etmek
+# Başka bir YAML dosyalarını bu pipelinelara dahil eder.
+# Büyük ve karmaşık projelerde ortak yapılandırma kısımlarda ayarları,
+# dış dosyalara saklayarak pipeline daha yönetebilinir ve daha modülerlik sağlar
+#include:
+  #- remote: 'https://deneme.com/path/to/common-config.yml'  
+
+##################################################################
+# Build Aşamasında
+build_job:
+  stage: build
+  script:
+    - echo "Building the application..."
+    - mkdir javascript
+    - touch javascript/template.js
+    - echo "$GLOBAL_VAR => Bu bir genel işlemdir."
+
+  # artifacts: Job içinde oluşturulan dosya saklanamasıdır.
+  # artifacts: Görevi: Daha sonraki işlerde kullanılabilinir. indirilebilinir veya incelemek için saklarızı.
+  # artifacts: Genellikler build işlmelerinde, log dosyalarında, test sonuçları vs işlemlerinde saklama önemlidir
+  artifacts:
+    paths:
+      -  javascript/
+    expire_in: 4 week # Artifacts 4 hafta boyunca saklanmasını belirtir.
+    untracked: false # Gereksiz dosyaları saklamamak ve .gitignore dosyasına eklediğimiz dosyaları dahil etmez. Ve bu .gitignore içinde dosyayı saklanmayacak
+    when: on_success # Yalnızca iş başarılıysa artifactsleri saklansın yoksa saklamasın.
+    #when: always # İş başarılı veya başarısız her iki durumda saklanır.
+    #when: on_failure # Yalnızca iş başarısızsa artifactsleri saklansın yoksa saklamasın.
+    access: all # Artifactslere erişimi kimler tarafından ulaşılacak ve Tüm kullanıcılar tarafından indirilebilir
+    #access: private # Sadece projeye erişimi olan kullanıcılar tarafından indirilebilir
+  only:
+    - main #Bu Jobta(işte) sadece main branchi üzerinde çalıştır.
+  #tags:
+    #- docker # Bu job belirli bir Docker runner üzerinde çalışacaktır.  Eğer ilgili runnerda tag yoksa çalışmayabilir.
+  interruptible: true  # Bu iş iptal edilebilinir. Yani başka bir pipeline veya manuel işlem gerektiren durumlarda iptal edilebilinir.  
+  timeout: 30m # Bu job maksimum çalışma süresi 30 dakika ile sınırlıdır.
+
+##################################################################
+# Test Aşamasında (1)
+test1_job:
+  stage: test
+  script:
+    - echo "Testing-1 the application..."
+    - echo "$GLOBAL_VAR => Bu bir genel işlemdir."
+    #- cd javascript
+  only:
+    - main #Bu Job'ta(işte) sadece main branchi üzerinde çalıştır.
+    - dev
+  needs: [build_job]  #Bu job build_job bitmeden başlamasın yani build_job beklesin
+  allow_failure: true # Bu Job başarısız olursa bile pipeline çalışmaya devam etsin
+  dependencies:
+    - build_job # Bu jobta daha önceki job'ın yani build_job'dan artifacts alır.
+  parallel: #Bu blokta aynı anda birden fazla iş yapılabilir. Testler paralel şekilde çalışabilir.
+    matrix: #Aynı işim farklı konfigürasyonlarında paralel olarak çalışmasını sağlar.
+      - TEST_SUITE: unit # Her bir konfigürasyon TEST_SUITE değişkeniyle farklı iki tür test ile çalışır.
+      - TEST_SUITE: integration
+
+      
+# Test Aşamasında (2)
+test2_job:
+  stage: test
+  script:
+    - echo "Testing-2 the application..."
+    - echo "$GLOBAL_VAR => Bu bir genel işlemdir."
+    #- cd javascript
+  only:
+    - main #Bu Job'ta(işte) sadece main branchi üzerinde çalıştır.
+    - dev 
+  needs: [build_job]  #Bu job build_job bitmeden başlamasın yani build_job beklesin
+  allow_failure: true # Bu Job başarısız olursa bile pipeline çalışmaya devam etsin  
+
+
+##################################################################
+# Deploy Aşaması
+deploy_job:
+  stage: deploy
+  script:
+    - echo "Deploying the application..."
+    - echo "$GLOBAL_VAR => Bu bir genel işlemdir."
+  only:
+    - main
+  retry:
+    max: 2 # Eğer deployment başarısız olursa en fazla iki kez yeniden dene
+  except:
+    - dev # deploymentta dev adındaki branch üzerinde çalıştırılmaz. Ancak diğer branchlerde çalıştırabiliriz.
+
+
+##################################################################
+# GitLAb Pages Aşaması
+pages:
+  stage: pages
+  script:
+    - echo "GitLab Pages..."
+    - mkdir public
+    - echo "<h1>GitLab sayfasına Hoş Geldiniz</h1>" > public/index.html
+  artifacts:
+    paths:
+      - public 
+  only:
+    - main

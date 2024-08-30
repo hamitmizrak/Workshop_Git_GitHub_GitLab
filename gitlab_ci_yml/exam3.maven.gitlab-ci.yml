@@ -1,0 +1,159 @@
+
+# Genel Değişkenler
+variables:
+  GLOBAL_VAR: "Bu genel bir değişkendir"
+  AFTER_VAR: "Sonra"
+  BEFORE_VAR: "Önce"
+  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end"
+  MAVEN_OPTS: "-Dmaven.repo.local=$CI_RPOJECT_DIR/.m2/repository"
+  MAVEN_CACHE: ".m2/repository"
+
+# Cache Maven Bağımlılığını
+cache:
+  paths:
+    - $MAVEN_CACHE
+    - node_modules/
+    - .npm/
+
+#############################################################################
+##################################################################
+# Her işten önce çalışacak
+before_script:
+    - echo "Bütün Scriptlerden $BEFORE_VAR Çalıştı"
+    #https://gitlab.com/devops-engineering3/offline-gitlab/-/settings/ci_cd
+    - echo "$PROJECT_VARIABLE"
+
+# Her işten sonra çalışacak
+after_script:
+    - echo "Bütün Scriptlerden $AFTER_VAR Çalıştı"
+    - echo "temizleme Genel değişkenlerden $GLOBAL_VAR okundu"
+
+    # unset: CI/CD pipelinelerda before_script_after_script veya script içinde 
+    # tanımlanan geçici değişkenleri temizlemek için kullanılır
+    # Bellek yönetiminde, büyük karmaşık pipelarda geçici değişkenlerin kullanımını bellekten temizlek için
+    # Güvenlik: Hassas bilgileri içeren kısımlarda erişilmemesi için kullanılır.
+    # unset: Bir değişkenin artık kullanılmayacağını belirtmek için kullanırız.
+    - unset GLOBAL_VAR 
+
+#############################################################################
+# Aşamalar (Stages)
+stages:
+    - build
+    - package
+    - test
+    - deploy
+    - cleanup
+    - pages
+
+
+# Dışarıdan YAML Dosyalarını Dahil Etmek
+# Başka bir YAML dosyalarını bu pipelinelara dahil eder.
+# Büyük ve karmaşık projelerde ortak yapılandırma kısımlarda ayarları,
+# dış dosyalara saklayarak pipeline daha yönetebilinir ve daha modülerlik sağlar
+#include:
+  #- remote: 'https://deneme.com/path/to/common-config.yml'  
+
+
+#############################################################################
+# Build Aşaması
+# Maven ile proje build edilir
+build_job:
+  stage: build
+  image: maven:3.8.5-openjdk-17 # maven:3.8.1-openjdk-11 Maven 3.8.1 ve OPENJDK 11 içeren bir Docker Image
+  script:
+    - echo "Maven JDK17 Compiler"
+    #- export PATH="$JAVA_HOME/bin:$PATH"
+    #- mvn $MAVEN_CLI_OPTS clean compile
+    - mvn $MAVEN_CLI_OPTS clean package
+  only:
+    - main # Bu job sadece main branchinde çalışacak  
+  artifacts:
+    paths:
+      - target/*.jar # Build işinden sonra compiler edilmiş java için JAR dosyasını saklar
+    expire_in: 4 week # 4 hafta boyunca saklansın
+  interruptible: true  # Bu iş iptal edilebilinir. Yani başka bir pipeline veya manuel işlem gerektiren durumlarda iptal edilebilinir.  
+  timeout: 30m # Bu job maksimum çalışma süresi 30 dakika ile sınırlıdır.
+
+
+#############################################################################
+# Package Aşamasında
+package_job:
+  stage: package
+  image: maven:3.8.5-openjdk-17
+  script:
+    - echo "Package application..."
+    - mvn $MAVEN_CLI_OPTS package
+  artifacts:
+    paths:
+      - target/*.jar
+  only:
+    - main #Bu Job'ta(işte) sadece main branchi üzerinde çalıştır.
+  needs: [build_job]  #Bu job build_job bitmeden başlamasın yani build_job beklesin
+  allow_failure: true # Bu Job başarısız olursa bile pipeline çalışmaya devam etsin
+
+
+#############################################################################
+# Test Aşamasında (1)
+test_job:
+  stage: test
+  image: maven:3.8.5-openjdk-17
+  script:
+    - echo "Testing-1 the application..."
+    - mvn $MAVEN_CLI_OPTS test
+  only:
+    - main #Bu Job'ta(işte) sadece main branchi üzerinde çalıştır.
+    - dev 
+  needs: [package_job]  #Bu job build_job bitmeden başlamasın yani build_job beklesin
+  allow_failure: true # Bu Job başarısız olursa bile pipeline çalışmaya devam etsin
+  dependencies:
+    - package_job # Bu jobta daha önceki job'ın yani build_job'dan artifacts alır.
+  parallel: #Bu blokta aynı anda birden fazla iş yapılabilir. Testler paralel şekilde çalışabilir.
+    matrix: #Aynı işim farklı konfigürasyonlarında paralel olarak çalışmasını sağlar.
+      - TEST_SUITE: unit # Her bir konfigürasyon TEST_SUITE değişkeniyle farklı iki tür test ile çalışır.
+      - TEST_SUITE: integration
+
+# Test Aşamasında (2)
+test2_job:
+  stage: test
+  script:
+    - echo "Testing-2 the application..."
+    - echo "$GLOBAL_VAR => Bu bir genel işlemdir."
+    #- cd javascript
+  only:
+    - main #Bu Job'ta(işte) sadece main branchi üzerinde çalıştır.
+    - dev 
+  needs: [package_job]  #Bu job build_job bitmeden başlamasın yani build_job beklesin
+  allow_failure: true # Bu Job başarısız olursa bile pipeline çalışmaya devam etsin  
+
+#############################################################################
+# Deploy Aşamasında
+deploy_job:
+  stage: deploy
+  image: maven:3.8.5-openjdk-17 # Maven 3.8.1 ve OPENJDK 11 içeren bir Docker Image
+  script:
+    - echo "Deploying the application..."
+    - mvn $MAVEN_CLI_OPTS deploy # PRojeyi belirtiken repository'e ekliyoruz.
+  environment:
+   name: production # Proje için bir ortam ismi verdik. Bu isim pipelinen
+   url: 'https://production.deneme.com'
+  #only:
+   #- tags # Bu Deploy Job'u sadece taglerde çalışır.
+  dependencies:
+    - build_job # Build Job'ta artifactsleri alalım. Örneğin JAR dosyası
+  retry:
+    max: 2 # Bu deployment Başarısız olursa en fazla iki kez yeniden denensin.  
+
+##################################################################
+# GitLAb Pages Aşaması
+pages:
+  stage: pages
+  script:
+    - echo "GitLab Pages..."
+    - mkdir public
+    - echo "<h1>GitLab sayfasına Hoş Geldiniz</h1>" > public/index.html
+  artifacts:
+    paths:
+      - public 
+  only:
+    - main    
+  

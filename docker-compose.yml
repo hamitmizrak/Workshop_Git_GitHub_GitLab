@@ -1,0 +1,40 @@
+# docker-compose --version
+# docker-compose -v
+# docker-compose up
+# docker-compose up -d
+# docker-compose -f Custom_Docker_compose.yml up
+# docker-compose -f Custom_Docker_compose.yml up -d
+# docker-compose down
+# docker-compose restart
+# docker-compose ps
+
+# restart: on-failure
+# restart: no => default olandır. Yani docker compose otomatik olarak restart yapsın
+# restart: unless-stopped => Konteynar durduğunda otomatik olarak yeniden başlasın
+# restart: always => Konteynar her zaman otomatik başlasın
+# restart: on-failure => konteryanar çökmesi halinde otomatik başlasın
+
+#########################################################################
+# Version
+version: '3.1'
+
+# Services
+services:
+  backend_web:
+    container_name: blog_container
+    image: blog_image
+    restart: on-failure
+    build: ./  # Normalde: Dockerfile build => docker image build -t imageAdi .
+    #build:
+      #context: .
+      #dockerfile: H2DB_Dockerfile
+    networks:
+      - springreactmysql
+    ports:
+      - "4444:4444"
+
+# Networks
+networks:
+  springreactmysql:
+    name: springreactmysql
+    driver: bridge

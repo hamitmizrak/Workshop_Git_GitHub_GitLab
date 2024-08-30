@@ -1,0 +1,41 @@
+# Aşamalar
+stages:
+  - build
+  - test
+  - deploy
+
+
+# Build Aşamasında
+build_job:
+  stage: build
+  script:
+    - echo "Building the application..."
+    - mkdir javascript
+    - touch javascript/template.js
+  only:
+    - main #Bu Jobta(işte) sadece main branchi üzerinde çalıştır.
+
+# Test Aşamasında
+test1_job:
+  stage: test
+  script:
+    - echo "Testing-1 the application..."
+    #- cd javascript
+  only:
+    - main #Bu Jobta(işte) sadece main branchi üzerinde çalıştır.
+
+test2_job:
+  stage: test
+  script:
+    - echo "Testing-2 the application..."
+    #- cd javascript
+  only:
+    - main #Bu Jobta(işte) sadece main branchi üzerinde çalıştır.
+
+# Deploy Aşaması
+deploy_job:
+  stage: deploy
+  script:
+    - echo "Deploying the application..."
+  only:
+    - main

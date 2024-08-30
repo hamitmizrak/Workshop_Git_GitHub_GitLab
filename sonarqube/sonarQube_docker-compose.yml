@@ -1,0 +1,114 @@
+# docker-compose --version
+# docker-compose -v
+# docker-compose up
+# docker-compose up -d
+# docker-compose -f Custom_Docker_compose.yml up
+# docker-compose -f Custom_Docker_compose.yml up -d
+# docker-compose down
+# docker-compose restart
+# docker-compose ps
+
+# restart: on-failure
+# restart: no => default olandır. Yani docker compose otomatik olarak restart yapsın
+# restart: unless-stopped => Konteynar durduğunda otomatik olarak yeniden başlasın
+# restart: always => Konteynar her zaman otomatik başlasın
+# restart: on-failure => konteryanar çökmesi halinde otomatik başlasın
+
+# command: sleep infinity  => Docker containerlerin sürekli çalışmasını sağlamak için kullanılan linux komutudur.
+# amaç: Konteynırlar arka planda sürekli çalışsınlar eğer bir görev yoksa bile sürekli çalışsın
+
+# Services
+services:
+
+  # Postgresql
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    restart: on-failure
+    environment:
+      POSTGRES_USER: sonarqube
+      POSTGRES_PASSWORD: sonarqube
+      POSTGRES_DB: sonarqube
+    volumes:
+      # - mysql_volume_data:/var/lib/mysql
+      - postgres_volume:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    expose:
+      - "5432"
+    networks:
+      - jdkpostgressonarqubenetwork
+
+  # JDK
+  jdk:
+    image: openjdk:latest
+    container_name: jdk
+    command: sleep infinity
+    networks:
+      - jdkpostgressonarqubenetwork
+    volumes:
+      - jdk_volume:/usr/src/myapp
+    working_dir: /usr/src/myapp
+
+  # SonarQube
+  sonarqube:
+    image: sonarqube:latest
+    container_name: sonarqube
+    environment:
+      SONARQUBE_JDBC_URL: jdbc:postgresql://postgres:5432/sonarqube
+      SONARQUBE_JDBC_USERNAME: sonarqube
+      SONARQUBE_JDBC_PASSWORD: sonarqube
+    depends_on:
+      -  postgres
+    ports:
+      - "1111:9000"
+    networks:
+      - jdkpostgressonarqubenetwork
+    #volumes:
+    #  - sonarqube_volume:/opt/sonarqube/data
+
+# Volumes
+volumes:
+  postgres_volume:
+    driver: local
+  jdk_volume:
+    driver: local
+
+# Networks
+networks:
+  jdkpostgressonarqubenetwork:
+    name: jdkpostgressonarqubenetwork
+    driver: bridge
+
+# docker ps
+# winpty docker container  exec -it  blog_react bash
+
+# docker-compose down
+# docker volume ls
+# docker volume inspect mysql_volume_data
+
+# docker-compose down
+# docker volume rm mysql_volume_data
+
+# winpty docker run -it --rm \
+# -v docker_apache_tomcat-conf://usr/local/tomcat/conf  \
+# -v docker_apache_tomcat-logs://usr/local/tomcat/logs \
+# -v docker_apache_tomcat-webapps://usr/local/tomcat/webapps \
+# blog_react bash
+
+# ls -al
+# cd usr/local/tomcat/logs
+# ls -al
+# cd usr/local/tomcat/webapps
+# Bu komut şunları yapar:
+
+# docker run: Yeni bir container çalıştırır.
+# -it: İnteraktif terminal modunda çalıştırır.
+# --rm: Container kapatıldığında otomatik olarak siler.
+# -v tomcat-logs:/data: tomcat-logs volume'unu container içindeki /data dizinine bağlar.
+# ubuntu: Ubuntu tabanlı bir container çalıştırır.
+# bash: Container içinde bash shell çalıştırır.
+
+# deploy kısmında, Swarm dağıtımı için ayarları yapıyoruz.
+# 3 kopya (replicas: 3) oluşturulacak, güncelleme yapılandırması
+# ve yeniden başlatma politikası belirlenmiştir.

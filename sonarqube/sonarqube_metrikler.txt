@@ -1,0 +1,64 @@
+
+0 : Security
+0 : Reliability
+61 : Maintainability
+0.0% : Hotspots Reviewed
+0.0% : Coverage
+0.0% : Duplications
+
+**********************************************************************************************************
+
+Proje Adı: spring_boot_sonar
+Görünürlük: Public
+Testten GEçme Durumu: Başarılı (Passed)
+Son Analiz Zamanı: 2 Dakika Önce
+Kod satırları: +1200 Satır kod(Java ve XML dosyaları var)
+
+**********************************************************************************************************
+
+A: Mükemmel
+B: İyi (Bazı Küçük Sorunlar Var)
+C: Orta (Orta Kalite Sorunlar başladı)
+D: Düşük Kalite (Önemli Sorunlar var dikkat)
+E: Çok Düşük Kalite (Ciddi cidd sorunlar var çok acil)
+
+Security (Güvenlik)
+A : Güvenlik açıkları bulunmamaktadır.
+B : Düşük Seviyede güvenlik açıkları bulunabilinir.
+C : Orta seviyede güvenlik açıkları  bulunmaktadır.
+D : Yüksek seviyede güvenlik açıkları  bulunmaktadır.
+E : Çok Yüksek seviyede güvenlik açıkları  bulunmaktadır. Acil müdahale yapmalısınız.
+
+Reliability (Güvenirlik)
+A : Hiçbir Güvenirlik sorunu bulunmamaktadır.
+B : Düşük Seviyede güvenirlik açıkları bulunabilinir.
+C : Orta seviyede güvenirlik açıkları  bulunmaktadır.
+D : Yüksek seviyede güvenirlik açıkları  bulunmaktadır.
+E : Çok Yüksek seviyede güvenirlik açıkları  bulunmaktadır. Acil müdahale yapmalısınız.
+
+Coverage (Kapsama)
+A: Test kapsama oranı: %80-100
+B: Test kapsama oranı: %60-80
+C: Test kapsama oranı: %40-60
+D: Test kapsama oranı: %20-40
+E: Test kapsama oranı: %0- 20
+
+Duplication(Kod Tekrarı)
+A: Kod tekrarı oranı %3'ün altındadır.
+B: Kod tekrarı oranı %3-%5'ün arasındadır.
+C: Kod tekrarı oranı %5-%10'ün arasındadır.
+D: Kod tekrarı oranı %10-%20'ün arasındadır.
+E: Kod tekrarı oranı %20'ün üzerindedir.
+
+**********************************************************************************************************
+
+Security(Güvenlik)                  : A(0)    => Projedeki Güvenlik Açığı bulunmamaktadır.
+Reliability(Güvenirlik)             : A(0)    => Projede Güvenirlik Sorunları bulunmamaktadır.
+Maintainability(Bakım Kolaylığı)    : A(61)   => Proje bakım kolaylığı 61 ancak yinede başarılı
+Hotspots Reviewed                   : E(0.0%)  => Projede manuel olarak güvenlik zafiyetleri varmı ? 0-1023
+Coverage(Kapsama Oranı)             : E(0.0%)    => Kodunuzda testler yoktur.
+Duplications(Tekrarlanan Kod Oranı) : A(0.0%)    => Projede yinelenen kod tekrarı yoktur.
+
+**********************************************************************************************************
+
+

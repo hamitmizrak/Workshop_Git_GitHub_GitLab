@@ -1,0 +1,4 @@
+# SonarQube için Gereksinimler
+# JDK 17
+# Postgresql
+# Maven

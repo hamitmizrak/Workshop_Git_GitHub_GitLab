@@ -1,0 +1,7 @@
+*** SonarQube Login Default *****************
+Login   : admin
+password: admin
+
+*** SonarQube Login  *****************
+Login   : admin
+password: adminadmin

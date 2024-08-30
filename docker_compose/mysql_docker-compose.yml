@@ -1,0 +1,112 @@
+# docker-compose --version
+# docker-compose -v
+# docker-compose up
+# docker-compose up -d
+# docker-compose -f Custom_Docker_compose.yml up
+# docker-compose -f Custom_Docker_compose.yml up -d
+# docker-compose down
+# docker-compose restart
+# docker-compose ps
+
+# restart: on-failure
+# restart: no => default olandır. Yani docker compose otomatik olarak restart yapsın
+# restart: unless-stopped => Konteynar durduğunda otomatik olarak yeniden başlasın
+# restart: always => Konteynar her zaman otomatik başlasın
+# restart: on-failure => konteryanar çökmesi halinde otomatik başlasın
+
+
+# JAVA PROPERTIES
+# spring.jpa.properties.hibernate.dialect = org.hibernate.dialect.MySQLDialect
+# spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+# spring.datasource.url=jdbc:mysql://localhost:3306/blog?createDatabaseIfNotExist=true&autoReconnect=true&allowPublicKeyRetrieval=true&useSSL=false
+# spring.datasource.username=root
+# spring.datasource.password=root
+
+# Services
+services:
+  # Backend
+  backend:
+    container_name: blog_react
+    image: blog_react
+    restart: always
+    #build: .
+    #build: ./dizinAdi
+    build:
+      context: .
+      dockerfile: Mysql_Dockerfile
+    ports:
+      - "4444:4444"
+    volumes:
+      - mysql_volume_data:/var/lib/mysql
+      #- ./src/main/resources/pom.xml:/src/main/resources/pom.xml
+
+    environment:
+      # spring.datasource.url=jdbc:mysql://localhost:3306/blog?createDatabaseIfNotExist=true&autoReconnect=true&allowPublicKeyRetrieval=true&useSSL=false
+      - spring.datasource.url=jdbc:mysql://mysql_depends_on:3306/blog?createDatabaseIfNotExist=true&autoReconnect=true&allowPublicKeyRetrieval=true&useSSL=false
+    networks:
+      - springreactmysql
+    depends_on:
+      - mysql_depends_on
+
+  # Mysql 8.0
+  mysql_depends_on:
+    image: mysql:8.0
+    ports:
+      - 3307:3306
+    expose:
+      - "3306"
+    networks:
+      - springreactmysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=blog
+      - MYSQL_USER=hamit
+      - MYSQL_PASSWORD=root
+    restart: unless-stopped
+
+# Networks
+networks:
+  springreactmysql:
+    name: springreactmysql
+    driver: bridge
+
+# Volumes
+volumes:
+  mysql_volume_data:
+    driver: local
+
+
+# docker ps
+# winpty docker container  exec -it  blog_react bash
+
+
+# docker-compose down
+# docker volume ls
+# docker volume inspect mysql_volume_data
+
+# docker-compose down
+# docker volume rm mysql_volume_data
+
+# winpty docker run -it --rm \
+# -v docker_apache_tomcat-conf://usr/local/tomcat/conf  \
+# -v docker_apache_tomcat-logs://usr/local/tomcat/logs \
+# -v docker_apache_tomcat-webapps://usr/local/tomcat/webapps \
+# blog_react bash
+
+# ls -al
+# cd usr/local/tomcat/logs
+# ls -al
+# cd usr/local/tomcat/webapps
+# Bu komut şunları yapar:
+
+# docker run: Yeni bir container çalıştırır.
+# -it: İnteraktif terminal modunda çalıştırır.
+# --rm: Container kapatıldığında otomatik olarak siler.
+# -v tomcat-logs:/data: tomcat-logs volume'unu container içindeki /data dizinine bağlar.
+# ubuntu: Ubuntu tabanlı bir container çalıştırır.
+# bash: Container içinde bash shell çalıştırır.
+
+
+# deploy kısmında, Swarm dağıtımı için ayarları yapıyoruz.
+# 3 kopya (replicas: 3) oluşturulacak, güncelleme yapılandırması
+# ve yeniden başlatma politikası belirlenmiştir.
