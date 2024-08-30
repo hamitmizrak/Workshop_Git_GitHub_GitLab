@@ -25,7 +25,7 @@
 
 variables:
   DOCKER_DRIVER: overlay2 #Bu Docker'ın hangi depolama sürücüsünü kullanacağını gösterir.
-  DOCKER_HOST: tcp://docker:2375 # Docker daemon'ın hangi adresten çalışcağını gösterir. 
+  DOCKER_HOST: tcp://docker:2375 # Docker daemon'ın hangi adresten çalışcağını gösterir.
   #DOCKER_HOST: tcp://localhost:2375 #
   DOCKER_TLS_CENTDIR: "" #Docker TLS (Transport Layer Security) sertifikasını gösterir. Biz burada boş bırakara TLS devre dışı bıraktık.
   IMAGE_TAG: latest # Docker imajının en kararlı ve son sürümünü işaret eder
@@ -62,11 +62,11 @@ after_script:
 # Stages'in başında, pipeline'ın başlatılması için gereken işler yapılır.
 # Stages
 stages:
-  - build 
+  - build
   - package
   - test # CI: için build, package ve test
   - deploy # CD: için deploy
-  - pages
+  - welcome_page
 
 # Dışarıdan YAML Dosyalarını Dahil Etmek
 # Başka bir YAML dosyalarını bu pipelinelara dahil eder.
@@ -76,6 +76,11 @@ stages:
   #- remote: 'https://deneme.com/path/to/common-config.yml'  
 
 ##############################################################
+# artifacts: GitLab CI/CD pipeline'ında artifacts (çıktı dosyaları) ile ilgili ayarları tanımlar. 
+# Artifacts, pipeline'ın bir aşaması tamamlandıktan sonra saklanan dosyalardır. 
+# Bu dosyalar, pipeline'ın sonraki aşamalarında kullanılabilir veya sonradan indirilebilir.
+
+
 # build JOB
 build_job:
   stage: build
@@ -84,12 +89,12 @@ build_job:
     # Maven ile clean komutu: target sil, package: compile ve package yap, -DskipTests: test yapma
     - mvn clean package -DskipTests
     # mvn komutundaki jar dosyalarının target içindeki dosyaları listele
-    - ls target/ 
+    - ls target/
   artifacts:
-    # untracked: false
-    # when: on_success
-    # access: all
-    # expire_in: "30 days"
+    untracked: true # Bu ayar, Git tarafından izlenmeyen (untracked) dosyaların artifacts olarak saklanıp saklanmayacağını belirler.
+    when: on_success # Artifacts'ın hangi koşullarda saklanacağını belirtir. on_success, yalnızca ilgili aşama başarıyla tamamlandığında artifacts'ın saklanacağını ifade eder
+    access: all      # Artifacts tüm proje üyeleri tarafından erişilebilir olacaktır.
+    expire_in: "30 days" # Artifacts'ın ne kadar süreyle saklanacağını belirtir. 30 days olarak ayarlandığında, artifacts 30 gün boyunca saklanacak ve sonra otomatik olarak silinecektir. Bu süre, pipeline verilerinin depolanma süresini optimize etmek için kullanılır.
     paths:
       - target/*.jar # target dizinindeki.jar dosyalarını kaydet
   only:
@@ -97,20 +102,111 @@ build_job:
   #tags:
     #- docker  #docker runnerda register yaparken bizim belirlediğimiz tag ismi olarak sadece bu tag varsa çalıştırsın
 
-##############################################################
+
 # package JOB
+package_job:
+  stage: package
+  image: docker:dind
+  needs: [build_job]  #Bu job build_job bitmeden başlamasın yani package_job beklesin
+  dependencies:
+    - build_job  # Bu jobta daha önceki job'ın yani build_job'dan artifacts alır.
+  variables:
+    #IMAGE_NAME: registry.gitlab.com/${CI_PROJECT_PATH_SLUG}:$CI_COMMIT_SHA
+    #https://gitlab.com/workshop644935/workshop_git_github_gitlab
+    IMAGE_NAME: registry.gitlab.com/workshop644935/workshop_git_github_gitlab
+  services:
+    - docker:dind
+  interruptible: true  # Bu iş iptal edilebilinir. Yani başka bir pipeline veya manuel işlem gerektiren durumlarda iptal edilebilinir.
+  timeout: 30m # Bu job maksimum çalışma süresi 30 dakika ile sınırlıdır.
+  script:
+    - echo Image name ${IMAGE_NAME}
+    - ls target/
+    - echo "Docker Login"
+    # Gitlab içindeki docker registry'e push yapabilmem için docker login olmalıyım.
+    - echo $CI_REGISTRY_PASSWORD | docker login $CI_REGISTRY --username $CI_REGISTRY_USER --password-stdin
+    - echo "build işlemi başladı..."
+    - docker build -t $IMAGE_NAME .
+    - echo "push işlemi başladı"
+    - docker push $IMAGE_NAME
+  only:
+      - main # Gitlabta sadece main branchinde çalıştır
+  #tags:
+    #- docker #docker runnerda register yaparken bizim belirlediğimiz tag ismi olarak sadece bu tag varsa çalıştırsın    
 
 
 ##############################################################
 # test JOB
+test_job1:
+  stage: test
+  needs: [package_job]  #Bu test_job, package_job bitmeden başlamasın yani test_job beklesin
+  dependencies:
+    - package_job  # Bu jobta daha önceki job'ın yani package_job'dan artifacts alır. 
+  allow_failure: true # Bu Job başarısız olursa bile pipeline çalışmaya devam etsin     
+  script:
+    - echo "test işlemi docker run"
+    # docker run --name containerNAME --rm -d imageNAME
+    - docker run --name docker_gitlab_app -d $CI_REGISTRY_IMAGE:$IMAGE_TAG
+    # Container içinden Test komutlarını yaz
+    #- echo "build işlemi docker exec"
+    #- docker exec docker_gitlab_app ./run_tests.sh
+    - echo "docker ps başladı"
+    - docker ps 
+    # Test sonuçlarını Loglama ile kontrol etmek
+    - echo "docker logs başladı"
+    - docker logs docker_gitlab_app
+    # Container Stop
+    #- echo "docker stop başladı"
+    #- docker stop docker_gitlab_app
+    # Container Silmek
+    #- docker rm docker_gitlab_app
+  only:  # Gitlabta sadece main branchinde çalıştır
+    - main
+  #tags:
+      #- docker 
 
+# test JOB
+test_job2:
+  stage: test
+  needs: [package_job]  #Bu test_job, package_job bitmeden başlamasın yani test_job beklesin 
+  allow_failure: true # Bu Job başarısız olursa bile pipeline çalışmaya devam etsin
+  script:
+    - echo "Test 2 başlasın"  
+  only:  # Gitlabta sadece main branchinde çalıştır
+    - main
+  #tags:
+      #- docker      
 
-
+ 
 ##############################################################
 # deploy JOB
-
-
-
-
+deploy_job:
+  stage: deploy
+  environment:
+   name: production  # production ortamına deploy etmek için environment adı verdik
+   url: https://your-dns-name.com  # production ortamının URL'sini verdik
+  script:
+    - echo "Deployment İşlemi başlasın"
+    - docker run --detach --publish  4444:4444  docker_gitlab_app $CI_REGISTRY_IMAGE:$IMAGE_TAG
+  retry:
+    max: 2 # Bu deployment başarısız olursa en fazla 2 defa daha denesin 0<=DENEME<=2
+  only:  # Gitlabta sadece main branchinde çalıştır
+    - main
+  #tags:
+      #- docker     
 ##################################################################
 # GitLab Pages Aşaması
+# 
+welcome_job:
+  stage: welcome_page
+  needs: [deploy_job]
+  script:
+    - echo "GitLab Welcome Pages İşlemi başlasın"
+    - mkdir welcome # welcome adında bir dizin oluştur.
+    - echo "<h1> GitLab Sayfasına hoşgeldiniz</h1>" > welcome/index.html
+  artifacts:
+    paths:
+      - welcome
+  only:  # Gitlabta sadece main branchinde çalıştır
+    - main
+  #tags:
+      #- docker 
