@@ -196,7 +196,7 @@ deploy_job:
       #- docker     
 ##################################################################
 # GitLab Pages Aşaması
-# 
+# https://workshop644935.gitlab.io/-/workshop_git_github_gitlab/-/jobs/7707695763/artifacts/welcome/index.html
 welcome_job:
   stage: welcome_page
   needs: [deploy_job]
