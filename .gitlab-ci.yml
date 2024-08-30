@@ -49,4 +49,68 @@ after_script:
   - echo "Bütün işler bittiğinde çalışacaklar scriptter"
   - echo "gitlab-ci.yml dosyasından gelen Değişken => $GLOBAL_VAR"
   - echo "Temizlik işleri bu scriptte yazılır"
+
+    # unset: CI/CD pipelinelerda before_script_after_script veya script içinde tanımlanan geçici değişkenleri temizlemek için kullanılır
+    # Bellek yönetiminde, büyük karmaşık pipelarda geçici değişkenlerin kullanımını bellekten temizlek için
+    # Güvenlik: Hassas bilgileri içeren kısımlarda erişilmemesi için kullanılır.
+    # unset: Bir değişkenin artık kullanılmayacağını belirtmek için kullanırız.
   - unset GLOBAL_VAR
+
+
+##############################################################
+# Stages, pipeline aşamalarında işlemlerin sırasını belirlemek için kullanılır.
+# Stages'in başında, pipeline'ın başlatılması için gereken işler yapılır.
+# Stages
+stages:
+  - build 
+  - package
+  - test # CI: için build, package ve test
+  - deploy # CD: için deploy
+  - pages
+
+# Dışarıdan YAML Dosyalarını Dahil Etmek
+# Başka bir YAML dosyalarını bu pipelinelara dahil eder.
+# Büyük ve karmaşık projelerde ortak yapılandırma kısımlarda ayarları,
+# dış dosyalara saklayarak pipeline daha yönetebilinir ve daha modülerlik sağlar
+#include:
+  #- remote: 'https://deneme.com/path/to/common-config.yml'  
+
+##############################################################
+# build JOB
+build_job:
+  stage: build
+  image: maven:3.8.5-openjdk-17-slim  # Maven:3.8.5 ve JDK-17 içeren bir Docker imajı kullanın
+  script:
+    # Maven ile clean komutu: target sil, package: compile ve package yap, -DskipTests: test yapma
+    - mvn clean package -DskipTests
+    # mvn komutundaki jar dosyalarının target içindeki dosyaları listele
+    - ls target/ 
+  artifacts:
+    # untracked: false
+    # when: on_success
+    # access: all
+    # expire_in: "30 days"
+    paths:
+      - target/*.jar # target dizinindeki.jar dosyalarını kaydet
+  only:
+    - main #Gitlabta sadece main branchinde çalıştır
+  #tags:
+    #- docker  #docker runnerda register yaparken bizim belirlediğimiz tag ismi olarak sadece bu tag varsa çalıştırsın
+
+##############################################################
+# package JOB
+
+
+##############################################################
+# test JOB
+
+
+
+##############################################################
+# deploy JOB
+
+
+
+
+##################################################################
+# GitLab Pages Aşaması
