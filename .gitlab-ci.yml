@@ -186,7 +186,8 @@ deploy_job:
    url: https://your-dns-name.com  # production ortamının URL'sini verdik
   script:
     - echo "Deployment İşlemi başlasın"
-    - docker run --detach --publish  4444:4444  docker_gitlab_app $CI_REGISTRY_IMAGE:$IMAGE_TAG
+    #- docker run --detach --publish  4444:4444 --name  docker_gitlab_app $CI_REGISTRY_IMAGE:$IMAGE_TAG
+    - docker run -d p 4444:4444 --name  docker_gitlab_app $CI_REGISTRY_IMAGE:$IMAGE_TAG
   retry:
     max: 2 # Bu deployment başarısız olursa en fazla 2 defa daha denesin 0<=DENEME<=2
   only:  # Gitlabta sadece main branchinde çalıştır
