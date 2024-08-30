@@ -10,6 +10,12 @@ git config --global user.name "Hamit Mizrak"
 git config --global user.email "hamitmizrak@outlook.com"
 ```
 
+git remote -v
+git remote set-url gitlab git@gitlab.com:workshop644935/workshop_git_github_gitlab.git
+git push gitlab main
+git push --force gitlab main
+git remote -v
+
 
 
 ## GitLab Git Repository Create 

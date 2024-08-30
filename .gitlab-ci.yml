@@ -1,1 +1,52 @@
 
+# .gitlab-ci.yml => GitLab CI/CD yapılandırma dosyasıdır.
+# GitLab pipeline çalışırtırırken Docker kullarak bileşenlerimi ayarlıyorum.
+
+#########################################################################
+# Variables: GitLab CI/CD pipelinelarda kullanılacak değişkenlerdir. 
+# NOT: Buradaki değişkenler pipelineların her aşamasında kullanabiliriz.
+
+# NOT: DOCKER_DRIVER: overlay2, docker içinde efault olarak ve en çok kullanılan depolama sürücüsüdür.
+# NOT: DOCKER_DRIVER: overlay2, dosya sistemi katmanlarında verimli bir şekilde yönetilmesini sağlar.
+# NOT: DOCKER_DRIVER: overlay2, daha iyi performans sağlayan depolama sürücüdür.
+
+# NOT: DOCKER_HOST: tcp://docker:2375 # Docker daemon'ın hangi adresten çalışcağını gösterir. 
+# NOT: DOCKER_HOST: Bu örneğimizde tcp üzerinden bağlanmasını sağlayalım.
+# NOT: DOCKER_HOST: 2375 portundan Docker daemon2ın dinlediği default porttur.
+
+# NOT: dind: docker in docker: Bir konteynar için başka bir konteynar çalışabilir. Yani GitLab CI/CD pipelarnların sağlıklı bir şekilde çalışmasına olanak sağlar.
+# NOT: dind: docker in docker: Yani GitLab CI/CD pipelarnların sağlıklı bir şekilde çalışmasına olanak sağlar.
+# NOT: dind: Docker içinde Docker (dind) yapılandırması sağlar.
+
+# NOT: DOCKER_TLS_CENTDIR: "" Docker TLS (Transport Layer Security) sertifikasını gösterir. Biz burada boş bırakara TLS devre dışı bıraktık.
+
+# NOT: services: Pipelanların aşamları sırasında çalıştıracağımız hizmetleri sağlar.
+# NOT: services: CI/CD süreçlerlerinde görevlerini desteklemek için ek konteynırların oluşmasına sağlar.
+
+variables:
+  DOCKER_DRIVER: overlay2 #Bu Docker'ın hangi depolama sürücüsünü kullanacağını gösterir.
+  DOCKER_HOST: tcp://docker:2375 # Docker daemon'ın hangi adresten çalışcağını gösterir. 
+  #DOCKER_HOST: tcp://localhost:2375 #
+  DOCKER_TLS_CENTDIR: "" #Docker TLS (Transport Layer Security) sertifikasını gösterir. Biz burada boş bırakara TLS devre dışı bıraktık.
+  IMAGE_TAG: latest # Docker imajının en kararlı ve son sürümünü işaret eder
+  GLOBAL_VAR: "Bu bir genel GitLab" #
+
+# Docker Image 
+image: gitlab/dind # docker in docker
+
+# Docker Hizmetleri
+services:
+  - docker:dind #
+
+#########################################################################
+# Her işten(jobs) önce yapılması gerekenleri buraya yazarız.
+before_script:
+  - echo "Bütün işlerden önce çalışacaklar yani hazırlık scriptleri buraya yazılır."
+  # https://gitlab.com/workshop644935/workshop_git_github_gitlab/-/settings/ci_cd
+  - echo "Gitlabtan gelen Değişken => $GITLAB_GLOBAL_VAR"
+
+after_script:
+  - echo "Bütün işler bittiğinde çalışacaklar scriptter"
+  - echo "gitlab-ci.yml dosyasından gelen Değişken => $GLOBAL_VAR"
+  - echo "Temizlik işleri bu scriptte yazılır"
+  - unset GLOBAL_VAR
